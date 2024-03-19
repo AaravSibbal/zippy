@@ -12,21 +12,39 @@ import (
 	TODO: make a nice man
 	TODO: add this to path
 */
-const EXPECTED_ARGS = 3
+const EXPECTED_ARGS = 4
+
+type application struct {
+	errlog *log.Logger
+	infoLog *log.Logger
+}
 
 func main() {
 
 	argsLen := len(os.Args)
 	WRONG_ARGS_LEN := fmt.Sprintf("Expected %d or got %d", EXPECTED_ARGS, argsLen)
-	errLog := log.New(os.Stdout, "Error: ", log.Ldate|log.Ltime)
 
+
+	errLog := log.New(os.Stdout, "Error: \t", log.Ldate|log.Ltime)
+	infoLog := log.New(os.Stdout, "Info: \t", log.Ldate|log.Ltime)
+
+	app := &application{
+		infoLog: infoLog,
+		errlog: errLog,
+
+	}
 	if argsLen == 3 || argsLen > 3{
 		errLog.Fatal(WRONG_ARGS_LEN)
 		return
 	}
-	inputFile := os.Args[1]
-	outputFile := os.Args[2]
+	
+	option := os.Args[1]
+	inputFile := os.Args[2]
+	outputFile := os.Args[3]
 
-	fmt.Println(inputFile, outputFile)
+	if option == "-f"	 {
+		infoLog.Println("this option is for a file")
+		app.zipFile(inputFile, outputFile)
+	}
 	os.Exit(1)
 }
