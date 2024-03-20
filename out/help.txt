@@ -1,7 +1,9 @@
 Usage of zippy:
 
     - How to use:
+        
         zippy [option] input output
+        
         Examples:
             
             **Files options**
@@ -10,16 +12,11 @@ Usage of zippy:
                 - input: some.txt
                 - output: output.zip
                 
-            "zippy -f .":
-                option: file option
-                - input: some.txt
-                - output: output.zip
-
             "zippy -f":
                 This does not work because the option is set for file.
             
             "zippy -f some.txt publish":
-                option: directory option
+                option: file option
                 - input: some.txt
                 - output: publish.zip
         
