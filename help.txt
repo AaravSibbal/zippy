@@ -51,11 +51,14 @@ Usage of zippy:
     - help:
         Help
 
+        expample: "zippy help"
+
     - [Option]:
         There are 2 options to choose from:
             1. -f: to zip files
             2. -d: to zip directories.
                 Note: all directories are recursively zipped
+   
     - input
         This can be either a file or a directory based on the 
         optiton that you hae set earlier
