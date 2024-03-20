@@ -11,15 +11,20 @@ Usage of zippy:
                 option: file option
                 - input: some.txt
                 - output: output.zip
-                
+            
             "zippy -f":
                 This does not work because the option is set for file.
+                Which requires file input
             
             "zippy -f some.txt publish":
                 option: file option
                 - input: some.txt
                 - output: publish.zip
         
+            "zippy -f some.txt .":
+                option: file option
+                - input: some.txt
+                - output: output.zip
             **Directory options**
             "zippy -d some":
                 option: directory option
