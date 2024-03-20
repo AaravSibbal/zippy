@@ -4,6 +4,7 @@ import "os"
 
 const UNEXPECTED_BEHAVIOUR_ERR = "Unexpected behaviour, typical skill issues\nrun 'zippy help' to do better" 
 const INPUT_FILE_ERR = "Input file name not given"
+
 func (app *application) run(){
 	len := len(os.Args)
 	
@@ -66,7 +67,9 @@ func (app *application) run(){
 						app.zipDirectory(input, output)
 					} else if (input != "." && output != "."){
 						app.zipDirectory(input, output)
-					} else {
+					} else if(input != "." && output == "."){
+						app.zipDirectory(input, app.outputFile)
+					}else {
 						app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
 					}
 
@@ -75,7 +78,7 @@ func (app *application) run(){
 					if(input == "." && output == "."){
 						app.errlog.Fatalln(INPUT_FILE_ERR)
 					} else if (input != "." && output != "."){
-						app.zipFile(input, app.outputFile)
+						app.zipFile(input, output)
 					}else {
 						app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
 					}
