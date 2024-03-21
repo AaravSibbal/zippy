@@ -10,9 +10,9 @@ TODO: make the general file zip
 TODO: make dir zip
 TODO: add this to path
 */
-const EXPECTED_ARGS = 4
 
 type application struct {
+	helpCache string
 	input      string
 	outputFile string
 	option     string
@@ -30,12 +30,20 @@ func main() {
 	infoLog := log.New(os.Stdout, "Info: \t", log.Ldate|log.Ltime)
 
 	app := &application{
+		helpCache: "",
 		option:     "-d",
 		input:      ".",
 		outputFile: "output.zip",
 		infoLog:    infoLog,
 		errlog:     errLog,
 	}
+
+	helpCache, err := getHelpString()
+	if err != nil {
+		errLog.Fatalln("Error reading the manual")
+		return
+	}
+	app.helpCache = helpCache
 
 	app.run()
 }

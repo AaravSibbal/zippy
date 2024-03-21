@@ -19,4 +19,5 @@ func (app *application) zipDirectory(input, outputFile string){
 
 func (app *application) getDir(input string){
 	// TODO: GET THE GET DIR FUNCTION WORKING
+
 }

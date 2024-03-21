@@ -1,10 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func (app *application) help() {
-	/**TODO: dont make a cache just turn the file into a string in the start
-			then print it with this function
-	*/ 
-	fmt.Println("get the help.txt file and print that bitch")
+	fmt.Println(app.helpCache)
+}
+
+func getHelpString() (string, error) {
+	file, err := os.ReadFile("./out/help.txt")
+	if err != nil {
+		return "", err
+	}
+	data := string(file)
+	return data, nil
 }
