@@ -14,73 +14,11 @@ func (app *application) run() error {
 	case 1:
 		app.zipDirectory(app.input, app.outputFile)
 	case 2:
-		err := app.twoArgs()
-		if err != nil {
-			return err
-		}
+		app.twoArgs()
 	case 3:
-		// That is zippy [option] input
-		option := os.Args[1]
-		input := os.Args[2]
-
-		switch option {
-		case "-d":
-			switch input {
-			case "":
-				app.zipDirectory(app.input, app.outputFile)
-			case ".":
-				app.zipDirectory(app.input, app.outputFile)
-
-			default:
-				app.zipDirectory(input, app.outputFile)
-			}
-		case "-f":
-			switch input {
-			case "":
-				app.errlog.Fatalln(INPUT_FILE_ERR)
-			case ".":
-				app.errlog.Fatalln(INPUT_FILE_ERR)
-			default:
-				err := app.zipFile(input, app.outputFile)
-				if err != nil {
-					return err
-				}
-			}
-		default:
-			app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
-		}
+		app.threeArgs()
 	case 4:
-
-		option := os.Args[1]
-		input := os.Args[2]
-		output := os.Args[3]
-		switch option {
-		case "-d":
-			if input == "." && output == "." {
-				app.zipDirectory(input, app.outputFile)
-			} else if input == "." && output != "." {
-				app.zipDirectory(input, output)
-			} else if input != "." && output != "." {
-				app.zipDirectory(input, output)
-			} else if input != "." && output == "." {
-				app.zipDirectory(input, app.outputFile)
-			} else {
-				app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
-			}
-
-		case "-f":
-			if input == "." && output == "." {
-				app.errlog.Fatalln(INPUT_FILE_ERR)
-			} else if input != "." && output != "." {
-				app.zipFile(input, output)
-			} else if input != "." && output == "" {
-				app.zipFile(input, app.outputFile)
-			} else {
-				app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
-			}
-		default:
-			app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
-		}
+		app.fourArgs()
 	default:
 		app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
 
@@ -89,13 +27,12 @@ func (app *application) run() error {
 	return nil
 }
 
-func (app *application) twoArgs() error {
+func (app *application) twoArgs() {
 
 	option := os.Args[1]
 	switch option {
 	case "help":
 		app.help()
-		return nil
 	case "-d":
 		app.zipDirectory(app.input, app.outputFile)
 	case "-f":
@@ -104,10 +41,9 @@ func (app *application) twoArgs() error {
 		app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
 	}
 
-	return nil
 }
 
-func (app *application) threeArgs() error {
+func (app *application) threeArgs() {
 
 	// That is zippy [option] input
 	option := os.Args[1]
@@ -137,5 +73,43 @@ func (app *application) threeArgs() error {
 	default:
 		app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
 	}
-	return nil
+}
+
+func (app *application) fourArgs() {
+
+	option := os.Args[1]
+	input := os.Args[2]
+	output := os.Args[3]
+	switch option {
+		case "-d":
+			if input == "." && output == "." {
+				app.zipDirectory(input, app.outputFile)
+			} else if input == "." && output != "." {
+				app.zipDirectory(input, createFileName(output))
+			} else if input != "." && output != "." {
+				app.zipDirectory(input, createFileName(output))
+			} else if input != "." && output == "." {
+				app.zipDirectory(input, app.outputFile)
+			} else {
+				app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
+			}
+
+		case "-f":
+			if input == "." && output == "." {
+				app.errlog.Fatalln(INPUT_FILE_ERR)
+			} else if input != "." && output != "." {
+				app.zipFile(input, createFileName(output))
+			} else if input != "." && output == "." {
+				app.zipFile(input, app.outputFile)
+			} else {
+				app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
+			}
+		default:
+			app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
+	}
+}
+
+func createFileName(outputFile string) string{
+	outputFile += ".zip"
+	return outputFile
 }
