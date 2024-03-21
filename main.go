@@ -45,5 +45,9 @@ func main() {
 	}
 	app.helpCache = helpCache
 
-	app.run()
+	err = app.run()
+
+	if err != nil {
+		errLog.Fatalln(err)
+	}
 }
