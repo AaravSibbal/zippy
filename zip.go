@@ -22,23 +22,37 @@ const ERR_COPY_BUFFER = "There was an error copying the file into the buffer wri
 const ERR_READ_DIR = "There was an error reading the directory"
 
 func (app *application) zipFile(input, outputFile string) {
-	// TODO: GET ZIP FILE WORKING
-	archive, err := os.Create(outputFile)
+	archive, err := createArchive(outputFile)
 	if err != nil {
 		app.errlog.Fatalf("%s %s", ERR_CREATE_ZIP, outputFile)
 	}
 	defer archive.Close()
-	zipWrirter := zip.NewWriter(archive)
+	zipWriter := zip.NewWriter(archive)
+	defer zipWriter.Close()
+
+	app.writeFileToArchive(zipWriter, input)
+
+}
+
+func createArchive(name string) (*os.File, error) {
+	archive, err := os.Create(name)
+	if err != nil {
+		return nil, err
+	}
+
+	return archive, nil
+}
+
+func (app *application) writeFileToArchive(zipWriter *zip.Writer, input string) {
 
 	app.infoLog.Printf("%s %s", OPEN_FILE, input)
 	file, err := os.Open(input)
 	if err != nil {
 		app.errlog.Fatalf("%s %v", ERR_OPEN_FILE, err)
 	}
-	defer file.Close()
 
 	app.infoLog.Printf("%s %s", WRITE_FILE, input)
-	writer, err := zipWrirter.Create(input)
+	writer, err := zipWriter.Create(input)
 	if err != nil {
 		app.errlog.Fatalf("%s %v", ERR_CREATE_BUFFER, err)
 	}
@@ -46,12 +60,56 @@ func (app *application) zipFile(input, outputFile string) {
 	if _, err = io.Copy(writer, file); err != nil {
 		app.errlog.Fatalf("%s %v", ERR_COPY_BUFFER, err)
 	}
-	zipWrirter.Close()
+	file.Close()
+}
+
+func changePath(path string) *string {
+	newPath := ""
+
+	for i := 0; i < len(path); i++ {
+		if string(path[i]) == `\` {
+			newPath += "/"
+		} else {
+			newPath += string(path[i])
+		}
+	}
+
+	return &newPath
 }
 
 func (app *application) zipDirectory(input, outputFile string) {
-	err := filepath.WalkDir("test", func(path string, d fs.DirEntry, err error) error {
+	archive, err := os.Create(outputFile)
+	if err != nil {
+		app.errlog.Fatalf("%s %v", ERR_CREATE_ZIP, err)
+	}
+	zipWriter := zip.NewWriter(archive)
+	defer zipWriter.Close()
+
+	err = filepath.WalkDir(input, func(path string, d fs.DirEntry, err error) error {
 		fmt.Println(path, d.Name(), "directory?", d.IsDir())
+		if d.IsDir() {
+			// if d.Name()
+			// do nothing
+		} else {
+			// app.writeFileToArchive(zipWriter, path)
+			file, err := os.Open(path)
+			pathForWriter := changePath(path)
+			if err != nil {
+				app.errlog.Fatalf("%s %v", ERR_OPEN_FILE, err)
+			}
+			defer file.Close()
+
+			writer, err := zipWriter.Create(*pathForWriter)
+			if err != nil {
+				app.errlog.Fatalf("%s %v", ERR_CREATE_BUFFER, err)
+			}
+			_, err = io.Copy(writer, file)
+			if err != nil {
+				app.errlog.Fatalf("%s %v", ERR_COPY_BUFFER, err)
+			}
+			file.Close()
+
+		}
 		return nil
 	})
 
