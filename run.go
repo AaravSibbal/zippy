@@ -12,7 +12,7 @@ func (app *application) run() {
 	case 0:
 		app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
 	case 1:
-		app.zipDirectory(app.input, app.outputFile)
+		app.help()
 	case 2:
 		app.twoArgs()
 	case 3:

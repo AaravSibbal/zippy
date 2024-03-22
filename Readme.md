@@ -18,13 +18,10 @@ I wanted something that was intuitive with minimal options. So I decided to do i
 
 ## How to install
 
-// TODO: add github link
 
+`git clone https://github.com/AaravSibbal/zippy.git`
 
-### Windows
-git clone [add github link here]
-
-go build -o zippy.exe .
+`go build -o zippy.exe .`
 
 move the binary to the bin folder 
 
