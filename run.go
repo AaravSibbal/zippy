@@ -5,7 +5,7 @@ import "os"
 const UNEXPECTED_BEHAVIOUR_ERR = "Unexpected behaviour, typical skill issues\nrun 'zippy help' to do better"
 const INPUT_FILE_ERR = "Input file name not given"
 
-func (app *application) run() error {
+func (app *application) run() {
 	len := len(os.Args)
 
 	switch len {
@@ -21,10 +21,8 @@ func (app *application) run() error {
 		app.fourArgs()
 	default:
 		app.errlog.Fatalln(UNEXPECTED_BEHAVIOUR_ERR)
-
 	}
 
-	return nil
 }
 
 func (app *application) twoArgs() {

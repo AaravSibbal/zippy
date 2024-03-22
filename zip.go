@@ -4,7 +4,9 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 // TODO: I CAN ALSO ADD A TEST TO CHECK IF THE CONTENT OF THE FILE IS NOT CORRECTED
@@ -17,6 +19,7 @@ const ERR_OPEN_FILE = "Couldn't open the file"
 const ERR_CREATE_ZIP = "There was an error creating the output file: "
 const ERR_CREATE_BUFFER = "There was an error creating the buffer"
 const ERR_COPY_BUFFER = "There was an error copying the file into the buffer writer"
+const ERR_READ_DIR = "There was an error reading the directory"
 
 func (app *application) zipFile(input, outputFile string) {
 	// TODO: GET ZIP FILE WORKING
@@ -47,13 +50,12 @@ func (app *application) zipFile(input, outputFile string) {
 }
 
 func (app *application) zipDirectory(input, outputFile string) {
-	fmt.Println("add the zip dir code here")
-	// TODO: GET THE ZIP DIRECTORY FUNCTION WORKING
-	fmt.Println(input, outputFile)
+	err := filepath.WalkDir("test", func(path string, d fs.DirEntry, err error) error {
+		fmt.Println(path, d.Name(), "directory?", d.IsDir())
+		return nil
+	})
 
-}
-
-func (app *application) getDir(input string) {
-	// TODO: GET THE GET DIR FUNCTION WORKING
-
+	if err != nil {
+		app.errlog.Fatalf("%s %v", ERR_READ_DIR, err)
+	}
 }

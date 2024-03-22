@@ -25,6 +25,8 @@ Usage of zippy:
                 option: file option
                 - input: some.txt
                 - output: output.zip
+            
+            
             **Directory options**
             "zippy -d some":
                 option: directory option
