@@ -79,6 +79,11 @@ zippy -d .
 | **Absolute Path Check** | Fixed the bug where the program would stall if it tried to zip its own output file. |
 | **Flag Parsing** | Replaced rigid argument counting with the `flag` package, allowing for optional inputs and unlimited file lists. |
 
+## Things to improve
+- Update the help section for the new way to use zippy. 
+- Add an unzip option
+- Add a way to exclude specific folders that the use wants
+- Create a way to auto install on windows so it doesn't require a build and added to the path. 
 ---
 
 ## Author:
