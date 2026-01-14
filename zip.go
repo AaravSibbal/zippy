@@ -21,27 +21,6 @@ const ERR_CREATE_BUFFER = "There was an error creating the buffer"
 const ERR_COPY_BUFFER = "There was an error copying the file into the buffer writer"
 const ERR_READ_DIR = "There was an error reading the directory"
 
-func (app *application) zipFile(input, outputFile string) {
-	archive, err := createArchive(outputFile)
-	if err != nil {
-		app.errlog.Fatalf("%s %s", ERR_CREATE_ZIP, outputFile)
-	}
-	defer archive.Close()
-	zipWriter := zip.NewWriter(archive)
-	defer zipWriter.Close()
-
-	app.writeFileToArchive(zipWriter, input)
-
-}
-
-func createArchive(name string) (*os.File, error) {
-	archive, err := os.Create(name)
-	if err != nil {
-		return nil, err
-	}
-
-	return archive, nil
-}
 
 func (app *application) writeFileToArchive(zipWriter *zip.Writer, input string) {
 
@@ -51,8 +30,14 @@ func (app *application) writeFileToArchive(zipWriter *zip.Writer, input string) 
 		app.errlog.Fatalf("%s %v", ERR_OPEN_FILE, err)
 	}
 
+	defer file.Close();
+
 	app.infoLog.Printf("%s %s", WRITE_FILE, input)
-	writer, err := zipWriter.Create(input)
+	header := &zip.FileHeader{
+		Name: input,
+		Method: zip.Deflate,
+	}
+	writer, err := zipWriter.CreateHeader(header)
 	if err != nil {
 		app.errlog.Fatalf("%s %v", ERR_CREATE_BUFFER, err)
 	}
@@ -60,7 +45,6 @@ func (app *application) writeFileToArchive(zipWriter *zip.Writer, input string) 
 	if _, err = io.Copy(writer, file); err != nil {
 		app.errlog.Fatalf("%s %v", ERR_COPY_BUFFER, err)
 	}
-	file.Close()
 }
 
 func changePath(path string) *string {
@@ -78,37 +62,37 @@ func changePath(path string) *string {
 }
 
 func (app *application) zipDirectory(input, outputFile string) {
+	absOutput, err := filepath.Abs(outputFile)
+	if err != nil {
+		app.errlog.Fatalf("Error calculating the path: %s,\n%s", outputFile, err.Error())
+	}
 	archive, err := os.Create(outputFile)
 	if err != nil {
 		app.errlog.Fatalf("%s %v", ERR_CREATE_ZIP, err)
 	}
+	defer archive.Close();
+
 	zipWriter := zip.NewWriter(archive)
 	defer zipWriter.Close()
 
 	err = filepath.WalkDir(input, func(path string, d fs.DirEntry, err error) error {
-		fmt.Println(path, d.Name(), "directory?", d.IsDir())
-		if d.IsDir() {
-			// if d.Name()
-			// do nothing
-		} else {
-			// app.writeFileToArchive(zipWriter, path)
-			file, err := os.Open(path)
-			pathForWriter := changePath(path)
-			if err != nil {
-				app.errlog.Fatalf("%s %v", ERR_OPEN_FILE, err)
+		if d.IsDir(){
+			if d.Name() == ".git" || d.Name() == "node_modules"{
+				return filepath.SkipDir;
 			}
-			defer file.Close()
+			return nil;
+		}
+		if err != nil {
+			return err;
+		}
+		fmt.Println(path, d.Name(), "directory?", d.IsDir());
+		absPath, _ := filepath.Abs(path);
+		if absPath == absOutput {
+			return nil;
+		}
 
-			writer, err := zipWriter.Create(*pathForWriter)
-			if err != nil {
-				app.errlog.Fatalf("%s %v", ERR_CREATE_BUFFER, err)
-			}
-			_, err = io.Copy(writer, file)
-			if err != nil {
-				app.errlog.Fatalf("%s %v", ERR_COPY_BUFFER, err)
-			}
-			file.Close()
-
+		if !d.IsDir() {
+			app.writeFileToArchive(zipWriter, path)
 		}
 		return nil
 	})
@@ -116,4 +100,33 @@ func (app *application) zipDirectory(input, outputFile string) {
 	if err != nil {
 		app.errlog.Fatalf("%s %v", ERR_READ_DIR, err)
 	}
+}
+
+func (app *application) zipMultipleFiles(files []string, outputFile string){
+	archive, err := os.Create(outputFile);
+	if err != nil {
+		app.errlog.Fatalf("Something went wrong with creating the zip file\n%s", err.Error())
+		return
+	}
+	defer archive.Close();
+
+	zipWriter := zip.NewWriter(archive);
+	
+	defer zipWriter.Close();
+
+	for _, file := range files {
+		app.writeFileToArchive(zipWriter, file);
+	}
+
+}
+
+func (app *application) verifyArchive(path string){
+	app.infoLog.Printf("Verifying the archive integrity: %s\n", path);
+
+	reader, err := zip.OpenReader(path);
+	if err != nil {
+		app.errlog.Fatalf("CORRUPTION DETECTED: the zip file is invalid\n%s", err.Error())
+	}
+	reader.Close();
+	app.infoLog.Println("Archive verified successfully!");
 }

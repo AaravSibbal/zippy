@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
+    "flag"
 	"os"
 )
-
 
 const HELP = `Usage of zippy:
 
@@ -85,11 +85,12 @@ const HELP = `Usage of zippy:
             - "file.zip": file.zip.zip
             - "": output.zip
 `
+
 type application struct {
 	helpCache  string
-	input      string
+	inputFiles []string
 	outputFile string
-	option     string
+	isDir      bool
 	errlog     *log.Logger
 	infoLog    *log.Logger
 }
@@ -102,15 +103,18 @@ func main() {
 
 	errLog := log.New(os.Stdout, "Error: \t", log.Ldate|log.Ltime)
 	infoLog := log.New(os.Stdout, "Info: \t", log.Ldate|log.Ltime)
-	
-	app := &application{
-		helpCache:  HELP,
-		option:     "-d",
-		input:      ".",
-		outputFile: "output.zip",
-		infoLog: infoLog,
-		errlog: errLog,
-	}
-	
+
+    outFlag := flag.String("o", "output", "The name of the resulting zip file, default is output.zip")
+    dirFlag := flag.Bool("d", false, "Set to true if zipping a directory by adding -d to the command")
+    flag.Parse();
+    app := &application{
+        helpCache: HELP,
+        inputFiles: flag.Args(),
+        outputFile: *outFlag,
+        isDir: *dirFlag,
+        errlog: errLog,
+        infoLog: infoLog,
+    }
+    
 	app.run()
 }
